@@ -3,11 +3,12 @@ package org.omarsalem.gameel.birds.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SimilarityCalculatorPearsonCorrelation implements SimilarityCalculator {
     @Override
-    public double calculateScore(Map<Integer, Integer> firstUserPreferences, Map<Integer, Integer> secondUserPreferences) {
-        List<Integer> commonArticles = getCommonArticles(firstUserPreferences, secondUserPreferences);
+    public double calculateScore(Map<Integer, Double> firstUserPreferences, Map<Integer, Double> secondUserPreferences) {
+        List<Integer> commonArticles = getCommonArticles(firstUserPreferences.keySet(), secondUserPreferences.keySet());
 
         if (commonArticles.isEmpty()) {
             return 0;
@@ -18,8 +19,8 @@ public class SimilarityCalculatorPearsonCorrelation implements SimilarityCalcula
         double sumProduct = 0;
 
         for (Integer articleId : commonArticles) {
-            final Integer user1Rating = firstUserPreferences.get(articleId);
-            final Integer user2Rating = secondUserPreferences.get(articleId);
+            final Double user1Rating = firstUserPreferences.get(articleId);
+            final Double user2Rating = secondUserPreferences.get(articleId);
 
             sum1 += user1Rating;
             sum2 += user2Rating;
@@ -28,7 +29,7 @@ public class SimilarityCalculatorPearsonCorrelation implements SimilarityCalcula
             sumSq1 += Math.pow(user1Rating, 2);
             sumSq2 += Math.pow(user2Rating, 2);
 
-            final int product = user1Rating * user2Rating;
+            final double product = user1Rating * user2Rating;
             sumProduct += product;
         }
 
@@ -42,12 +43,12 @@ public class SimilarityCalculatorPearsonCorrelation implements SimilarityCalcula
         return num / den;
     }
 
-    private List<Integer> getCommonArticles(Map<Integer, Integer> firstUserPreferences, Map<Integer, Integer> secondUserPreferences) {
+    private List<Integer> getCommonArticles(Set<Integer> firstUserPreferences, Set<Integer> secondUserPreferences) {
         List<Integer> commonArticles = new ArrayList<>();
 
-        for (Map.Entry<Integer, Integer> entry : firstUserPreferences.entrySet()) {
-            if (secondUserPreferences.containsKey(entry.getKey())) {
-                commonArticles.add(entry.getKey());
+        for (Integer entry : firstUserPreferences) {
+            if (secondUserPreferences.contains(entry)) {
+                commonArticles.add(entry);
             }
         }
         return commonArticles;

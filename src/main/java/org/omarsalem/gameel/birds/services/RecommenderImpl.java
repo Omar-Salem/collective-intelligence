@@ -11,17 +11,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.summingInt;
+import static java.util.stream.Collectors.summingDouble;
 
 public class RecommenderImpl implements Recommender {
-    private static Map<Action, Integer> ACTION_WEIGHTS;
+    private static Map<Action, Double> ACTION_WEIGHTS;
 
     static {
         ACTION_WEIGHTS = new HashMap<>();
-        ACTION_WEIGHTS.put(Action.View, 1);
-        ACTION_WEIGHTS.put(Action.UpVote, 1);
-        ACTION_WEIGHTS.put(Action.DownVote, -1);
-        ACTION_WEIGHTS.put(Action.Download, 2);
+        ACTION_WEIGHTS.put(Action.View, 1d);
+        ACTION_WEIGHTS.put(Action.UpVote, 1d);
+        ACTION_WEIGHTS.put(Action.DownVote, -1d);
+        ACTION_WEIGHTS.put(Action.Download, 2d);
     }
 
     private final UserActionsRepo userActionsRepo;
@@ -34,18 +34,18 @@ public class RecommenderImpl implements Recommender {
 
     @Override
     public void getRecommendations(int userId) {
-        Map<Integer, Map<Integer, Integer>> matrix = getUsersArticlesRatings();
+        Map<Integer, Map<Integer, Double>> matrix = getUsersArticlesRatings();
         List<Recommendation> recommendations = new ArrayList<>(matrix.size());
 
-        final Map<Integer, Integer> userPreferences = matrix.get(userId);
+        final Map<Integer, Double> userPreferences = matrix.get(userId);
 
-        for (Map.Entry<Integer, Map<Integer, Integer>> entry : matrix.entrySet()) {
+        for (Map.Entry<Integer, Map<Integer, Double>> entry : matrix.entrySet()) {
             final Integer otherUserId = entry.getKey();
             if (otherUserId == userId) {
                 continue;
             }
 
-            final Map<Integer, Integer> otherUserPreferences = matrix.get(otherUserId);
+            final Map<Integer, Double> otherUserPreferences = matrix.get(otherUserId);
             final double sim = similarityCalculator.calculateScore(userPreferences, otherUserPreferences);
             recommendations.add(new Recommendation(otherUserId, sim, otherUserPreferences));
         }
@@ -74,17 +74,17 @@ public class RecommenderImpl implements Recommender {
                         }));
     }
 
-    private Map<Integer, Map<Integer, Integer>> getUsersArticlesRatings() {
+    private Map<Integer, Map<Integer, Double>> getUsersArticlesRatings() {
         //group by users
         Map<Integer, List<UserAction>> usersActions = userActionsRepo.getUserActions()
                 .stream()
                 .collect(groupingBy(UserAction::getUserId));
-        Map<Integer, Map<Integer, Integer>> usersArticlesRatings = new HashMap<>(usersActions.size());
+        Map<Integer, Map<Integer, Double>> usersArticlesRatings = new HashMap<>(usersActions.size());
         for (Map.Entry<Integer, List<UserAction>> entry : usersActions.entrySet()) {
-            final Map<Integer, Integer> articlesRatings = entry
+            final Map<Integer, Double> articlesRatings = entry
                     .getValue()
                     .stream()
-                    .collect(groupingBy(UserAction::getArticleId, summingInt(value -> ACTION_WEIGHTS.get(value.getAction()))));
+                    .collect(groupingBy(UserAction::getArticleId, summingDouble(value -> ACTION_WEIGHTS.get(value.getAction()))));
             usersArticlesRatings.put(entry.getKey(), articlesRatings);
 
         }
@@ -96,7 +96,7 @@ public class RecommenderImpl implements Recommender {
         private final double similarity;
         private final Map<Integer, Double> otherUserSimilarity;
 
-        public Recommendation(int otherUserId, double similarity, Map<Integer, Integer> otherUserPreferences) {
+        public Recommendation(int otherUserId, double similarity, Map<Integer, Double> otherUserPreferences) {
             this.otherUserId = otherUserId;
             this.similarity = similarity;
             this.otherUserSimilarity = otherUserPreferences
