@@ -1,7 +1,6 @@
-package org.omarsalem.gameel.birds;
+package org.omarsalem.gameel.birds.models;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.omarsalem.gameel.birds.models.Action;
 
 public class UserAction {
     private final int day;

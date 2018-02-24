@@ -1,4 +1,4 @@
-package org.omarsalem.gameel.birds;
+package org.omarsalem.gameel.birds.models;
 
 public enum Action {
     View,
