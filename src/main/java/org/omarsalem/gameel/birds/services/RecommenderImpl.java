@@ -4,10 +4,7 @@ import org.omarsalem.gameel.birds.dal.UserActionsRepo;
 import org.omarsalem.gameel.birds.models.Action;
 import org.omarsalem.gameel.birds.models.UserAction;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -22,6 +19,13 @@ public class RecommenderImpl implements Recommender {
         ACTION_WEIGHTS.put(Action.UpVote, 1d);
         ACTION_WEIGHTS.put(Action.DownVote, -1d);
         ACTION_WEIGHTS.put(Action.Download, 2d);
+        ACTION_WEIGHTS.put(Action.Three, 3d);
+        ACTION_WEIGHTS.put(Action.ThreeFive, 3.5d);
+        ACTION_WEIGHTS.put(Action.TwoFive, 2.5d);
+        ACTION_WEIGHTS.put(Action.OneFive, 1.5d);
+        ACTION_WEIGHTS.put(Action.FourFive, 4.5d);
+        ACTION_WEIGHTS.put(Action.Four, 4.0d);
+        ACTION_WEIGHTS.put(Action.Five, 5.0d);
     }
 
     private final UserActionsRepo userActionsRepo;
@@ -33,7 +37,7 @@ public class RecommenderImpl implements Recommender {
     }
 
     @Override
-    public void getRecommendations(int userId) {
+    public List<Map.Entry<Integer, Double>> getRecommendations(int userId) {
         Map<Integer, Map<Integer, Double>> matrix = getUsersArticlesRatings();
         List<Recommendation> recommendations = new ArrayList<>(matrix.size());
 
@@ -72,6 +76,18 @@ public class RecommenderImpl implements Recommender {
 
                             totalRatings.put(articleId, aggregates);
                         }));
+
+        final Map<Integer, Double> collect = totalRatings
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, c -> c.getValue().getWeight()));
+        final List<Map.Entry<Integer, Double>> collect1 = collect
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue())
+                .collect(Collectors.toList());
+        Collections.reverse(collect1);
+        return collect1;
     }
 
     private Map<Integer, Map<Integer, Double>> getUsersArticlesRatings() {
@@ -145,6 +161,15 @@ public class RecommenderImpl implements Recommender {
 
         public double getWeight() {
             return ratingSum / simSum;
+        }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "ratingSum=" + ratingSum +
+                    ", simSum=" + simSum +
+                    ", weight=" + getWeight() +
+                    '}';
         }
     }
 }

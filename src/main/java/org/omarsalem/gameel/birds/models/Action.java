@@ -4,5 +4,6 @@ public enum Action {
     View,
     DownVote,
     UpVote,
-    Download
+    Download,
+    Three, TwoFive, OneFive, FourFive, Four, ThreeFive, Five
 }
