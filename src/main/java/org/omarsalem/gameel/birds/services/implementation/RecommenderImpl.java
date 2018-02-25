@@ -1,39 +1,26 @@
-package org.omarsalem.gameel.birds.services;
+package org.omarsalem.gameel.birds.services.implementation;
 
 import org.omarsalem.gameel.birds.dal.UserActionsRepo;
-import org.omarsalem.gameel.birds.models.Action;
 import org.omarsalem.gameel.birds.models.UserAction;
+import org.omarsalem.gameel.birds.services.contract.RatingCalculator;
+import org.omarsalem.gameel.birds.services.contract.Recommender;
+import org.omarsalem.gameel.birds.services.contract.SimilarityCalculator;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.summingDouble;
 
 public class RecommenderImpl implements Recommender {
-    private static Map<Action, Double> ACTION_WEIGHTS;
-
-    static {
-        ACTION_WEIGHTS = new HashMap<>();
-        ACTION_WEIGHTS.put(Action.View, 1d);
-        ACTION_WEIGHTS.put(Action.UpVote, 1d);
-        ACTION_WEIGHTS.put(Action.DownVote, -1d);
-        ACTION_WEIGHTS.put(Action.Download, 2d);
-//        ACTION_WEIGHTS.put(Action.Three, 3d);
-//        ACTION_WEIGHTS.put(Action.ThreeFive, 3.5d);
-//        ACTION_WEIGHTS.put(Action.TwoFive, 2.5d);
-//        ACTION_WEIGHTS.put(Action.OneFive, 1.5d);
-//        ACTION_WEIGHTS.put(Action.FourFive, 4.5d);
-//        ACTION_WEIGHTS.put(Action.Four, 4.0d);
-//        ACTION_WEIGHTS.put(Action.Five, 5.0d);
-    }
 
     private final UserActionsRepo userActionsRepo;
     private final SimilarityCalculator similarityCalculator;
+    private final RatingCalculator ratingCalculator;
 
-    public RecommenderImpl(UserActionsRepo userActionsRepo, SimilarityCalculator similarityCalculator) {
+    public RecommenderImpl(UserActionsRepo userActionsRepo, SimilarityCalculator similarityCalculator, RatingCalculator ratingCalculator) {
         this.userActionsRepo = userActionsRepo;
         this.similarityCalculator = similarityCalculator;
+        this.ratingCalculator = ratingCalculator;
     }
 
     @Override
@@ -100,7 +87,7 @@ public class RecommenderImpl implements Recommender {
             final Map<Integer, Double> articlesRatings = entry
                     .getValue()
                     .stream()
-                    .collect(groupingBy(UserAction::getArticleId, summingDouble(value -> ACTION_WEIGHTS.get(value.getAction()))));
+                    .collect(groupingBy(UserAction::getArticleId, ratingCalculator.getCollector()));
             usersArticlesRatings.put(entry.getKey(), articlesRatings);
 
         }

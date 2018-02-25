@@ -1,4 +1,4 @@
-package org.omarsalem.gameel.birds.services;
+package org.omarsalem.gameel.birds.services.contract;
 
 import java.util.Map;
 

@@ -1,4 +1,6 @@
-package org.omarsalem.gameel.birds.services;
+package org.omarsalem.gameel.birds.services.implementation;
+
+import org.omarsalem.gameel.birds.services.contract.SimilarityCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
