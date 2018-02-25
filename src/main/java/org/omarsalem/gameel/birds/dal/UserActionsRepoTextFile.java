@@ -10,6 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserActionsRepoTextFile implements UserActionsRepo {
+
+    private final String fileName;
+
+    public UserActionsRepoTextFile(String fileName) {
+        this.fileName = fileName;
+    }
+
     @Override
     public List<UserAction> getUserActions() {
         try {
@@ -20,16 +27,18 @@ public class UserActionsRepoTextFile implements UserActionsRepo {
     }
 
     private List<UserAction> tryGetUserActions() throws IOException {
-        InputStream inputStream = getClass().getResourceAsStream("/training.txt");
-        String[] rows = IOUtils.toString(inputStream, "UTF-8").split(System.getProperty("line.separator"));
+        InputStream inputStream = getClass().getResourceAsStream(fileName);
+        String[] rows = IOUtils
+                .toString(inputStream, "UTF-8")
+                .split(System.getProperty("line.separator"));
         boolean found = false;
         List<UserAction> userActions = new ArrayList<>();
         for (String l : rows) {
-            if (l.startsWith("# Day, Action, UserID, UserName, ArticleID, ArticleName")) {
-                found = true;
-                continue;
-            }
-            if (found) {
+            if (!found) {
+                if (l.startsWith("# Day, Action, UserID, UserName, ArticleID, ArticleName")) {
+                    found = true;
+                }
+            } else {
                 String[] columns = l.split(",");
                 UserAction userAction = new UserAction(Integer.parseInt(columns[0]),
                         Action.valueOf(columns[1]),

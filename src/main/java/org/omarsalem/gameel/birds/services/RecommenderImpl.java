@@ -19,13 +19,13 @@ public class RecommenderImpl implements Recommender {
         ACTION_WEIGHTS.put(Action.UpVote, 1d);
         ACTION_WEIGHTS.put(Action.DownVote, -1d);
         ACTION_WEIGHTS.put(Action.Download, 2d);
-        ACTION_WEIGHTS.put(Action.Three, 3d);
-        ACTION_WEIGHTS.put(Action.ThreeFive, 3.5d);
-        ACTION_WEIGHTS.put(Action.TwoFive, 2.5d);
-        ACTION_WEIGHTS.put(Action.OneFive, 1.5d);
-        ACTION_WEIGHTS.put(Action.FourFive, 4.5d);
-        ACTION_WEIGHTS.put(Action.Four, 4.0d);
-        ACTION_WEIGHTS.put(Action.Five, 5.0d);
+//        ACTION_WEIGHTS.put(Action.Three, 3d);
+//        ACTION_WEIGHTS.put(Action.ThreeFive, 3.5d);
+//        ACTION_WEIGHTS.put(Action.TwoFive, 2.5d);
+//        ACTION_WEIGHTS.put(Action.OneFive, 1.5d);
+//        ACTION_WEIGHTS.put(Action.FourFive, 4.5d);
+//        ACTION_WEIGHTS.put(Action.Four, 4.0d);
+//        ACTION_WEIGHTS.put(Action.Five, 5.0d);
     }
 
     private final UserActionsRepo userActionsRepo;

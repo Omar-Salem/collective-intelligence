@@ -6,9 +6,14 @@ import org.omarsalem.gameel.birds.services.RecommenderImpl;
 import org.omarsalem.gameel.birds.services.SimilarityCalculatorPearsonCorrelation;
 
 public class Application {
-    private static Recommender recommender = new RecommenderImpl(new UserActionsRepoTextFile(), new SimilarityCalculatorPearsonCorrelation());
+    private static Recommender recommender;
 
     public static void main(String[] args) {
+        final UserActionsRepoTextFile userActionsRepo = new UserActionsRepoTextFile("/training.txt");
+        final SimilarityCalculatorPearsonCorrelation similarityCalculator = new SimilarityCalculatorPearsonCorrelation();
+        
+        recommender = new RecommenderImpl(userActionsRepo, similarityCalculator);
+
         recommender.getRecommendations(1);
 //        Map<Integer, Map<Integer, Integer>> usersArticlesRatings = getUsersArticlesRatings();
 //

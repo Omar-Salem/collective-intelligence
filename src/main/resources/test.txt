@@ -1,3 +1,4 @@
+# Day, Action, UserID, UserName, ArticleID, ArticleName
 25,View,1461,User 1461,1874,Article 1874
 25,View,1462,User 1462,1663,Article 1663
 25,Download,1462,User 1462,1663,Article 1663
