@@ -8,6 +8,7 @@ import org.omarsalem.gameel.birds.services.implementation.RecommenderImpl;
 import org.omarsalem.gameel.birds.services.implementation.SimilarityCalculatorPearsonCorrelation;
 
 import java.util.List;
+import java.util.Map;
 
 public class Application {
     private static Recommender recommender;
@@ -19,8 +20,25 @@ public class Application {
 
         recommender = new RecommenderImpl(userActionsRepo, similarityCalculator, ratingCalculator);
 
-        recommender.getRecommendations(1);
+
         final List<UserAction> userActions = new UserActionsRepoTextFile("/test.txt").getUserActions();
+        final Map<Integer, Map<Integer, Double>> actualUsersArticlesRatings = recommender.getUsersArticlesRatings(userActions);
+
+        for (Map.Entry<Integer, Map<Integer, Double>> users : actualUsersArticlesRatings.entrySet()) {
+            final Integer userId = users.getKey();
+            System.out.println(String.format("User %s, ", userId));
+            final Map<Integer, Double> actual = users.getValue();
+            final List<Map.Entry<Integer, Double>> recommendations = recommender.getRecommendations(userId);
+            recommendations.forEach(integerDoubleEntry -> {
+                final Integer articleId = integerDoubleEntry.getKey();
+                if (actual.containsKey(articleId)) {
+                    System.out.println(String.format("actual: %s, recommended: %s", actual.get(articleId), integerDoubleEntry.getValue()));
+                } else {
+//                    System.out.println("miss");
+                }
+            });
+
+        }
     }
 
 
