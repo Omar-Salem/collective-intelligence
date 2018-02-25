@@ -16,18 +16,20 @@ public class RecommenderImpl implements Recommender {
     private final UserActionsRepo userActionsRepo;
     private final SimilarityCalculator similarityCalculator;
     private final RatingCalculator ratingCalculator;
+    private final List<UserAction> userActions;
+    private final Map<Integer, Map<Integer, Double>> matrix;
 
     public RecommenderImpl(UserActionsRepo userActionsRepo, SimilarityCalculator similarityCalculator, RatingCalculator ratingCalculator) {
         this.userActionsRepo = userActionsRepo;
         this.similarityCalculator = similarityCalculator;
         this.ratingCalculator = ratingCalculator;
+
+        userActions = userActionsRepo.getUserActions();
+        matrix = getUsersArticlesRatings(userActions);
     }
 
     @Override
     public List<Map.Entry<Integer, Double>> getRecommendations(int userId) {
-        final List<UserAction> userActions = userActionsRepo.getUserActions();
-
-        Map<Integer, Map<Integer, Double>> matrix = getUsersArticlesRatings(userActions);
 
         List<Recommendation> scoreMatrix = createScoreMatrix(userId, matrix);
 
@@ -68,7 +70,9 @@ public class RecommenderImpl implements Recommender {
 
             final Map<Integer, Double> otherUserPreferences = matrix.get(otherUserId);
             final double sim = similarityCalculator.calculateScore(userPreferences, otherUserPreferences);
-            recommendations.add(new Recommendation(otherUserId, sim, otherUserPreferences));
+            if (sim > 0) {
+                recommendations.add(new Recommendation(otherUserId, sim, otherUserPreferences));
+            }
         }
         return recommendations;
     }
@@ -78,13 +82,13 @@ public class RecommenderImpl implements Recommender {
         scoreMatrix
                 .forEach(recommendation -> recommendation
                         .getOtherUserSimilarity()
-                        .forEach((articleId, value) -> {
+                        .forEach((articleId, rating) -> {
                             if (!totalRatings.containsKey(articleId)) {
                                 totalRatings.put(articleId, new WeightedScore(0d, 0d));
                             }
                             final WeightedScore weightedScore = totalRatings.get(articleId);
 
-                            final double total = weightedScore.getRatingSum() + value;
+                            final double total = weightedScore.getRatingSum() + rating;
                             weightedScore.setRatingSum(total);
 
                             if (recommendation.otherUserSimilarity.containsKey(articleId)) {
