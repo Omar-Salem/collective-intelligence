@@ -1,29 +1,35 @@
 package org.omarsalem.gameel.birds.services.implementation;
 
-import org.omarsalem.gameel.birds.dal.UserActionsRepo;
+import org.omarsalem.gameel.birds.dal.contract.UserActionsRepo;
 import org.omarsalem.gameel.birds.models.UserAction;
 import org.omarsalem.gameel.birds.services.contract.RatingCalculator;
 import org.omarsalem.gameel.birds.services.contract.Recommender;
 import org.omarsalem.gameel.birds.services.contract.SimilarityCalculator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 
 public class RecommenderImpl implements Recommender {
 
-    private final UserActionsRepo userActionsRepo;
+    public static final int TOP_N = 5;
     private final SimilarityCalculator similarityCalculator;
     private final RatingCalculator ratingCalculator;
     private final List<UserAction> userActions;
     private final Map<Integer, Map<Integer, Double>> matrix;
 
-    public RecommenderImpl(UserActionsRepo userActionsRepo, SimilarityCalculator similarityCalculator, RatingCalculator ratingCalculator) {
-        this.userActionsRepo = userActionsRepo;
+    public RecommenderImpl(UserActionsRepo userActionsRepo,
+                           SimilarityCalculator similarityCalculator,
+                           RatingCalculator ratingCalculator) {
         this.similarityCalculator = similarityCalculator;
         this.ratingCalculator = ratingCalculator;
 
+        //train
         userActions = userActionsRepo.getUserActions();
         matrix = getUsersArticlesRatings(userActions);
     }
@@ -35,7 +41,7 @@ public class RecommenderImpl implements Recommender {
 
         Map<Integer, WeightedScore> totalRatings = createWeightedScore(scoreMatrix);
 
-        return sortByWeight(totalRatings);
+        return sortByWeightAndTakeTopN(totalRatings);
     }
 
     @Override
@@ -100,18 +106,29 @@ public class RecommenderImpl implements Recommender {
         return totalRatings;
     }
 
-    private List<Map.Entry<Integer, Double>> sortByWeight(Map<Integer, WeightedScore> totalRatings) {
-        final Map<Integer, Double> collect = totalRatings
+    private List<Map.Entry<Integer, Double>> sortByWeightAndTakeTopN(Map<Integer, WeightedScore> totalRatings) {
+        return totalRatings
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, c -> c.getValue().getWeight()));
-        final List<Map.Entry<Integer, Double>> collect1 = collect
-                .entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByValue())
+                .map((Function<Map.Entry<Integer, WeightedScore>, Map.Entry<Integer, Double>>) entry -> new Map.Entry<Integer, Double>() {
+                    @Override
+                    public Integer getKey() {
+                        return entry.getKey();
+                    }
+
+                    @Override
+                    public Double getValue() {
+                        return entry.getValue().getWeight();
+                    }
+
+                    @Override
+                    public Double setValue(Double value) {
+                        return null;
+                    }
+                })
+                .sorted((o1, o2) -> o2.getValue().compareTo(o1.getValue()))
+                .limit(TOP_N)
                 .collect(Collectors.toList());
-        Collections.reverse(collect1);
-        return collect1;
     }
 
     private static class Recommendation {
