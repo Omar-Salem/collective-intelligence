@@ -77,7 +77,13 @@ public class RecommenderImpl implements Recommender {
             final Map<Integer, Double> otherUserPreferences = matrix.get(otherUserId);
             final double sim = similarityCalculator.calculateScore(userPreferences, otherUserPreferences);
             if (sim > 0) {
-                recommendations.add(new Recommendation(otherUserId, sim, otherUserPreferences));
+                final Map<Integer, Double> preferences = otherUserPreferences
+                        .entrySet()
+                        .stream()
+                        .filter(integerDoubleEntry -> !userPreferences.containsKey(integerDoubleEntry.getKey()))
+                        .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+                final Recommendation recommendation = new Recommendation(otherUserId, sim, preferences);
+                recommendations.add(recommendation);
             }
         }
         return recommendations;
