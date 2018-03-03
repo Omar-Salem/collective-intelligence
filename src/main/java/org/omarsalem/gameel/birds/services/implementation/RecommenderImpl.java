@@ -87,7 +87,7 @@ public class RecommenderImpl implements Recommender {
         Map<Integer, WeightedScore> totalRatings = new HashMap<>();
         scoreMatrix
                 .forEach(recommendation -> recommendation
-                        .getOtherUserSimilarity()
+                        .getOtherUserPreferences()
                         .forEach((articleId, rating) -> {
                             if (!totalRatings.containsKey(articleId)) {
                                 totalRatings.put(articleId, new WeightedScore(0d, 0d));
@@ -97,7 +97,7 @@ public class RecommenderImpl implements Recommender {
                             final double total = weightedScore.getRatingSum() + rating;
                             weightedScore.setRatingSum(total);
 
-                            if (recommendation.otherUserSimilarity.containsKey(articleId)) {
+                            if (recommendation.otherUserPreferences.containsKey(articleId)) {
                                 weightedScore.setSimSum(weightedScore.getSimSum() + recommendation.getSimilarity());
                             }
 
@@ -134,12 +134,12 @@ public class RecommenderImpl implements Recommender {
     private static class Recommendation {
         private final int otherUserId;
         private final double similarity;
-        private final Map<Integer, Double> otherUserSimilarity;
+        private final Map<Integer, Double> otherUserPreferences;
 
         public Recommendation(int otherUserId, double similarity, Map<Integer, Double> otherUserPreferences) {
             this.otherUserId = otherUserId;
             this.similarity = similarity;
-            this.otherUserSimilarity = otherUserPreferences
+            this.otherUserPreferences = otherUserPreferences
                     .entrySet()
                     .stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() * similarity));
@@ -153,8 +153,8 @@ public class RecommenderImpl implements Recommender {
             return similarity;
         }
 
-        public Map<Integer, Double> getOtherUserSimilarity() {
-            return otherUserSimilarity;
+        public Map<Integer, Double> getOtherUserPreferences() {
+            return otherUserPreferences;
         }
     }
 

@@ -7,6 +7,11 @@
 //import org.omarsalem.gameel.birds.dal.contract.UserActionsRepo;
 //import org.omarsalem.gameel.birds.models.Action;
 //import org.omarsalem.gameel.birds.models.UserAction;
+//import org.omarsalem.gameel.birds.services.contract.Recommender;
+//import org.omarsalem.gameel.birds.services.contract.SimilarityCalculator;
+//import org.omarsalem.gameel.birds.services.implementation.RatingCalculatorImpl;
+//import org.omarsalem.gameel.birds.services.implementation.RecommenderImpl;
+//import org.omarsalem.gameel.birds.services.implementation.SimilarityCalculatorPearsonCorrelation;
 //
 //import java.util.ArrayList;
 //import java.util.List;
@@ -26,7 +31,6 @@
 //    @Before
 //    public void init() {
 //        userActionsRepoMock = mock(UserActionsRepo.class);
-//        target = new RecommenderImpl(userActionsRepoMock, similarityCalculator);
 //    }
 //
 //    @Test
@@ -76,6 +80,7 @@
 //
 //
 //        when(userActionsRepoMock.getUserActions()).thenReturn(userActions);
+//        target = new RecommenderImpl(userActionsRepoMock, similarityCalculator, new RatingCalculatorImpl());
 //
 //        //Act
 //        final List<Map.Entry<Integer, Double>> recommendations = target.getRecommendations(6);
